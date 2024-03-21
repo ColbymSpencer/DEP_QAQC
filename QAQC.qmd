@@ -1,0 +1,46 @@
+---
+title: "QAQC"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+# import libraries
+library(tidyverse)
+library(sf)
+library(janitor)
+
+# creat custom functions
+skimmer <- function(layer, n) {
+  sapply(layer, function(x) {
+    uniq <- unique(x)
+    if (length(uniq) < n)
+      uniq_values = sort(uniq)
+    else
+      length(uniq)
+  })
+}
+
+# import layers
+walkways <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Walkways_Statewide')
+trails <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Trails_Statewide')
+bridges <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Bridges_Statewide')
+structures <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Structures_Statewide')
+```
+
+```{r explore}
+# walkways
+skimmer(walkways, 50)
+
+# trails
+skimmer(trails, 100)
+
+# bridges
+skimmer(bridges, 30)
+
+# structures
+skimmer(structures, 40)
+```
+
