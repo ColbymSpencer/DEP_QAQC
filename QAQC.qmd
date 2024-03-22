@@ -28,6 +28,7 @@ walkways <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer 
 trails <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Trails_Statewide')
 bridges <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Bridges_Statewide')
 structures <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Structures_Statewide')
+structures <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Structures_Statewide')
 ```
 
 ```{r explore}
