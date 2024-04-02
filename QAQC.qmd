@@ -6,7 +6,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup}
+```{r setup libraries and functions}
 # import libraries
 library(tidyverse)
 library(sf)
@@ -22,13 +22,27 @@ skimmer <- function(layer, n) {
       length(uniq)
   })
 }
+```
 
+
+```{r setup import layers}
 # import layers
 walkways <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Walkways_Statewide')
 trails <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Trails_Statewide')
 bridges <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Bridges_Statewide')
 structures <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Structures_Statewide')
+park_entrances <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Park_Entrances_Statewide')
+```
+
+
+```{r setup import layers}
 structures <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Structures_Statewide')
+```
+
+
+```{r import archeology sites}
+ap <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'archeology_site_polygons') |>
+  as_tibble()
 ```
 
 ```{r explore}
@@ -43,5 +57,31 @@ skimmer(bridges, 30)
 
 # structures
 skimmer(structures, 40)
+```
+
+```{r explore archeology}
+skimmer(ap, 81)
+
+ap |>
+  count(CLASSIFY, sort = TRUE)
+
+ap |>
+  select(contains('CULTURE')) |>
+  pivot_longer(contains('CULTURE'), names_to = 'culture_group', values_to = 'culture_period') |>
+  select(culture_period) |>
+  filter(culture_period != ' ') |>
+  distinct() |>
+  arrange(culture_period) |>
+  writexl::write_xlsx('c:/users/Spencer_C/Downloads/cultural_periods_domain.xlsx')
+
+ap |>
+  select(contains('SITETYPE')) |>
+  pivot_longer(contains('SITETYPE'), names_to = 'sitetype_group', values_to = 'site_type') |>
+  select(site_type) |>
+  filter(site_type != ' ') |>
+  distinct() |>
+  arrange(site_type) |>
+  # view()
+  writexl::write_xlsx('c:/users/Spencer_C/Downloads/site_type_domain.xlsx')
 ```
 
