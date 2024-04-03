@@ -26,22 +26,31 @@ skimmer <- function(layer, n) {
 
 
 ```{r setup import layers}
-# import layers
-walkways <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Walkways_Statewide')
-trails <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Trails_Statewide')
-bridges <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Bridges_Statewide')
-structures <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Structures_Statewide')
-park_entrances <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Park_Entrances_Statewide')
+##### layers from duplicate gdb #####
+# walkways <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Walkways_Statewide')
+# trails <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Trails_Statewide')
+# bridges <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Bridges_Statewide')
+# structures <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Structures_Statewide')
+# park_entrances <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Park_Entrances_Statewide')
+
+##### archaeology sites #####
+# ap <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'archeology_site_polygons') |>
+#   as_tibble()
+
+##### layers from source gdb #####
+# structures <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Structures_Statewide')
+
+trails <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Trails_Statewide')
+walkways <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Walkways_Statewide')
 ```
 
+```{r clean}
+walkways <- walkways |>
+  clean_names() |>
+  as_tibble()
 
-```{r setup import layers}
-structures <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Structures_Statewide')
-```
-
-
-```{r import archeology sites}
-ap <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'archeology_site_polygons') |>
+trails <- trails |>
+  clean_names() |>
   as_tibble()
 ```
 
@@ -57,6 +66,13 @@ skimmer(bridges, 30)
 
 # structures
 skimmer(structures, 40)
+```
+
+```{r}
+data.frame(tr = sort(names(trails)), wlk = c(sort(names(walkways)), NA, NA)) |>
+  view()
+  # writexl::write_xlsx('c:/users/Spencer_C/downloads/field_matching.xlsx')
+
 ```
 
 ```{r explore archeology}
