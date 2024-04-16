@@ -12,7 +12,7 @@ library(tidyverse)
 library(sf)
 library(janitor)
 
-# creat custom functions
+# create custom functions
 skimmer <- function(layer, n) {
   sapply(layer, function(x) {
     uniq <- unique(x)
@@ -33,15 +33,20 @@ skimmer <- function(layer, n) {
 # structures <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Structures_Statewide')
 # park_entrances <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Park_Entrances_Statewide')
 
-##### archaeology sites #####
+#### special project layers ####
 # ap <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'archeology_site_polygons') |>
 #   as_tibble()
+natcom_updates <- sf::st_read('C:/Users/Spencer_C/Documents/Misc/Grrenway_NatCom_20240404.gdb/MHCCFG_FPL_Parcels_NC_Polygons_v2.gdb', layer = 'MHCCFG_FPL_Parcels_Current_NC_Polygons_2023_v2')
 
 ##### layers from source gdb #####
 # structures <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Structures_Statewide')
 
 trails <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Trails_Statewide')
-walkways <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Walkways_Statewide')
+# walkways <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Walkways_Statewide')
+natcoms <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Natural_Communities_Statewide')
+
+natcoms_MHC <- sf::st_read('C:/Users/Spencer_C/Documents/ArcGIS/Projects/MyProject/MyProject.gdb', layer = 'updated_natcoms_MHC')
+sort(unique(natcoms_MHC$EC_TYPE))
 ```
 
 ```{r clean}
@@ -68,7 +73,7 @@ skimmer(bridges, 30)
 skimmer(structures, 40)
 ```
 
-```{r}
+```{r make key for combininig trails and walkways fields}
 data.frame(tr = sort(names(trails)), wlk = c(sort(names(walkways)), NA, NA)) |>
   view()
   # writexl::write_xlsx('c:/users/Spencer_C/downloads/field_matching.xlsx')
@@ -99,5 +104,43 @@ ap |>
   arrange(site_type) |>
   # view()
   writexl::write_xlsx('c:/users/Spencer_C/Downloads/site_type_domain.xlsx')
+```
+
+```{r compare natcom request to existing}
+natcom_updates <- natcom_updates |>
+  mutate(FNAI_NC = str_to_title(FNAI_NC))
+
+
+names(natcoms)
+names(natcom_updates)
+unique(natcoms$EC_TYPE)
+unique(natcom_updates$FNAI_NC)[!unique(natcom_updates$FNAI_NC) %in% unique(natcoms$EC_TYPE)]
+
+unique(natcoms$EC_TYPE)[grepl('Clear',unique(natcoms$EC_TYPE))]
+```
+
+```{r}
+trails |>
+  as_tibble() |>
+  count(NAME, sort = TRUE)
+```
+
+```{r real natcoms}
+natcoms <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Natural_Communities_Statewide') |>
+  as_tibble()
+
+natcoms |>
+  count(SITE_NAME, DFC_TYPE, DFC_CODE, sort = TRUE)
+
+natcoms |>
+  count(SITE_NAME,EC_CODE, DFC_TYPE, DFC_CODE, sort = TRUE) |>
+  filter(DFC_CODE == 'UNC') |>
+  view()
+
+natcoms |>
+  filter(SITE_NAME == 'Marjorie Harris Carr Cross Florida Greenways State Recreation and Conservation Area') |>
+  distinct(EC_TYPE) |>
+  arrange(-desc(EC_TYPE)) |>
+  print(n = Inf)
 ```
 
