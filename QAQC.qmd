@@ -13,7 +13,7 @@ library(sf)
 library(janitor)
 
 # create custom functions
-skimmer <- function(layer, n) {
+skimmer <- function(layer, n = 50) {
   sapply(layer, function(x) {
     uniq <- unique(x)
     if (length(uniq) < n)
@@ -27,7 +27,14 @@ skimmer <- function(layer, n) {
 
 ```{r setup import layers}
 ##### layers from duplicate gdb #####
-# walkways <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Walkways_Statewide')
+
+# walkways <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_20240425.gdb', layer = 'Walkways_Statewide') |>
+#   as_tibble()
+# trails <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_20240425.gdb', layer = 'Trails_Statewide') |>
+#   as_tibble()
+# roads <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_20240425.gdb', layer = 'Roads_Statewide') |>
+#   as_tibble()
+
 # trails <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Trails_Statewide')
 # bridges <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Bridges_Statewide')
 # structures <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_Copy_202403.gdb', layer = 'Structures_Statewide')
@@ -42,10 +49,18 @@ natcom_updates <- sf::st_read('C:/Users/Spencer_C/Documents/Misc/Grrenway_NatCom
 # structures <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Structures_Statewide')
 
 trails <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Trails_Statewide')
+roads <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Roads_Statewide') |>
+  as_tibble()
 # walkways <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Walkways_Statewide')
-natcoms <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Natural_Communities_Statewide')
+# natcoms <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Natural_Communities_Statewide')
 
 natcoms_MHC <- sf::st_read('C:/Users/Spencer_C/Documents/ArcGIS/Projects/MyProject/MyProject.gdb', layer = 'updated_natcoms_MHC')
+sort(unique(natcoms_MHC$EC_TYPE))
+
+natcoms <- sf::st_read('C:/Users/Spencer_C/Desktop/FSP_20240425.gdb', layer = 'Natural_Communities_Statewide') |>
+  janitor::clean_names() |>
+  as_tibble()
+
 sort(unique(natcoms_MHC$EC_TYPE))
 ```
 
@@ -71,6 +86,10 @@ skimmer(bridges, 30)
 
 # structures
 skimmer(structures, 40)
+
+# natcoms
+natcoms |>
+  count(fire_dependent, fire_influenced)
 ```
 
 ```{r make key for combininig trails and walkways fields}
@@ -78,6 +97,7 @@ data.frame(tr = sort(names(trails)), wlk = c(sort(names(walkways)), NA, NA)) |>
   view()
   # writexl::write_xlsx('c:/users/Spencer_C/downloads/field_matching.xlsx')
 
+unique(walkways$TYPE)
 ```
 
 ```{r explore archeology}
@@ -142,5 +162,12 @@ natcoms |>
   distinct(EC_TYPE) |>
   arrange(-desc(EC_TYPE)) |>
   print(n = Inf)
+```
+
+```{r explore roads}
+roads <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Roads_Statewide') |>
+  as_tibble()
+
+skimmer(roads)
 ```
 
