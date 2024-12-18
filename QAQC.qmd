@@ -23,13 +23,63 @@ skimmer <- function(layer, n = 50) {
   })
 }
 ```
+```{r import campsites and structures}
+campsites <- sf::st_read('c:/users/Spencer_C/Desktop/FloridaStateParksGIS_20241025.gdb', layer = 'Camping_Sites_Statewide') |>
+  as_tibble()
+structures <- sf::st_read('c:/users/Spencer_C/Desktop/FloridaStateParksGIS_20241025.gdb', layer = 'Structures_Statewide') |>
+  as_tibble()
+old_structures <- sf::st_read('c:/users/Spencer_C/Desktop/FloridaStateParksGIS_backup20231215.gdb', layer = 'Structures_Statewide') |>
+  as_tibble()
+
+```
+```{r explore campsites}
+names(campsites)
+skimmer(campsites, 15)
+# count indistinct ID rows
+campsites |>
+  distinct(SITE_NAME, CAMP_NAME, SITE_ID) |>
+  nrow() - nrow(campsites)
+# what IDs are the same
+campsites |>
+  group_by(SITE_NAME, CAMP_NAME, SITE_ID) |>
+  count() |>
+  filter(n != 1)
+```
+
+
+```{r explore structures}
+names(structures)
+skimmer(structures,30)
+skimmer(structures2,30)
+
+structures |>
+  anti_join(old_structures, join_by(GlobalID)) |>
+  view()
+
+structures |>
+  inner_join(old_structures, join_by(NUMBER)) |>
+  nrow()
+
+structures |>
+  count(NUMBER, sort = TRUE) |>
+  filter(n != 1)
+```
 
 
 ```{r setup import layers}
+##### invasive plants ####
+all_invasives <- sf::st_read('C:/Users/Spencer_C/Documents/avenza_schema_generator/kml_schema_generator.gdb', layer = 'all_invasive_plants') |>
+  as_tibble() |>
+  janitor::clean_names()
+
 ##### layers from duplicate gdb #####
 
 # walkways <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_20240425.gdb', layer = 'Walkways_Statewide') |>
 #   as_tibble()
+pe <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_20240425.gdb', layer = 'Park_Entrances_Statewide') |>
+  as_tibble()
+campsites <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Camping_Sites_Statewide') |>
+  as_tibble()
 # trails <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_20240425.gdb', layer = 'Trails_Statewide') |>
 #   as_tibble()
 # roads <- sf::st_read('c:/users/Spencer_C/Desktop/FSP_20240425.gdb', layer = 'Roads_Statewide') |>
@@ -50,6 +100,8 @@ natcom_updates <- sf::st_read('C:/Users/Spencer_C/Documents/Misc/Grrenway_NatCom
 
 trails <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Trails_Statewide')
 roads <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Roads_Statewide') |>
+  as_tibble()
+trails_walkways <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Trails_and_Walkways_Statewide') |>
   as_tibble()
 # walkways <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Walkways_Statewide')
 # natcoms <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateParksGIS.gdb', layer = 'Natural_Communities_Statewide')
@@ -76,7 +128,7 @@ trails <- trails |>
 
 ```{r explore}
 # walkways
-skimmer(walkways, 50)
+skimmer(campsites, 100)
 
 # trails
 skimmer(trails, 100)
@@ -90,6 +142,10 @@ skimmer(structures, 40)
 # natcoms
 natcoms |>
   count(fire_dependent, fire_influenced)
+
+# invasive plants
+all_invasives |>
+  count(infestation_area_id, last_survey_date, sort = TRUE)
 ```
 
 ```{r make key for combininig trails and walkways fields}
@@ -169,5 +225,16 @@ roads <- sf::st_read('//floridadep/data/drp/gis/statewidecoverages/FloridaStateP
   as_tibble()
 
 skimmer(roads)
+```
+
+```{r Trails_Walkways}
+names(trails_walkways)
+
+# comparable fields
+tw <- trails_walkways |>
+  clean_names() |>
+  select(name, use, surface, accessibility, type, material)
+
+skimmer(tw)
 ```
 

@@ -1,0 +1,38 @@
+---
+title: "Invasive Plants"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup libraries and functions}
+# import libraries
+library(tidyverse)
+library(sf)
+library(janitor)
+
+# create custom functions
+skimmer <- function(layer, n = 50) {
+  sapply(layer, function(x) {
+    uniq <- unique(x)
+    if (length(uniq) < n)
+      uniq_values = sort(uniq)
+    else
+      length(uniq)
+  })
+}
+```
+
+```{r import campsites and structures}
+ip <- sf::st_read('C:/Users/Spencer_C/Documents/ArcGIS/Projects/Invasive Plant Avenza Demo/Invasive Plant Avenza Demo.gdb', layer = 'InvasivePlants') |>
+  as_tibble()
+```
+
+```{r}
+# duplicate rows
+
+ip[duplicated(ip), ] |> view()
+  
+```
+

@@ -1,0 +1,64 @@
+---
+title: "Natural Communities"
+author: "Colby S"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup libraries and functions}
+# import libraries
+library(tidyverse)
+library(sf)
+library(janitor)
+
+# create custom functions
+skimmer <- function(layer, n = 50) {
+  sapply(layer, function(x) {
+    uniq <- unique(x)
+    if (length(uniq) < n)
+      uniq_values = sort(uniq)
+    else
+      length(uniq)
+  })
+}
+```
+```{r import campsites and structures}
+natcoms_raw <- sf::st_read('c:/users/Spencer_C/Desktop/20241209_FloridaStateParksGIS.gdb', layer = 'Natural_Communities_Statewide') |>
+  as_tibble()
+
+```
+```{r clean data}
+natcoms <- natcoms_raw |>
+  select('EC_TYPE','EC_CODE','DFC_CODE','DFC_TYPE') |>
+  janitor::clean_names()
+```
+```{r create key}
+ec_key <- natcoms |>
+  select(starts_with('ec')) |>
+  distinct_all() |>
+  filter(!is.na(ec_type), !is.na(ec_code)) |>
+  rename('code'= ec_code, 'type' = ec_type)
+
+dfc_key <- natcoms |>
+  select(starts_with('dfc')) |>
+  distinct_all() |>
+  rename('code'= dfc_code, 'type' = dfc_type)
+
+master_key <- rbind(ec_key, dfc_key) |>
+  distinct_all() |>
+  add_count(type, name = 'type_count') |>
+  add_count(code, name = 'code_count')
+
+master_key |>
+  filter(type_count != 1 | code_count != 1) |>
+  view()
+```
+
+```{r type code combo count}
+natcoms |>
+  count(ec_code, ec_type, sort = TRUE) |>
+  view()
+```
+
