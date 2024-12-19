@@ -1,0 +1,65 @@
+---
+title: "test URLs"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+# packages
+library(tidyverse)
+library(readxl)
+# custom funcitons
+valid_url <- function(url_in,t=3){
+  con <- url(url_in)
+  check <- suppressWarnings(try(open.connection(con,open="rt",timeout=t),silent=TRUE)[1])
+  suppressWarnings(try(close.connection(con),silent=T))
+  ifelse(is.null(check),TRUE,FALSE)
+}
+```
+
+```{r import data}
+trails <- read_excel("~/Existing Trails/Colby/InputTrails.xls")
+```
+
+```{r clean}
+url_list <- unique(trails$URL)
+url_list[grepl('\\<c\\>',url_list)] <- 'http://this.isafakelinkone.biz'
+url_list[is.na(url_list)] <- 'http://this.isafakelinktwo.biz'
+
+# test clean result
+url_list[order(nchar(url_list), url_list)]
+```
+
+```{r test urls}
+url_status <- as.vector(sapply(url_list,valid_url))
+df <- data.frame(url_list, url_status)
+```
+
+```{r}
+url_list <- c('',' ', 'http://www.freshfromflorida.com/Divisions-Offices/Florida-Forest-Service/Our-Forests/State-Forests/Twin-Rivers-State-Forest', 'http://www.indianriverlagoonbyway.com/point_of_interest/historic-jungle-trail/')
+
+url_list <- c('http://www.freshfromflorida.com/Divisions-Offices/Florida-Forest-Service/Our-Forests/State-Forests/Twin-Rivers-State-Forest', 'http://www.indianriverlagoonbyway.com/point_of_interest/historic-jungle-trail/')
+sapply(url_list, url)
+```
+
+```{r manually in excel}
+trails |>
+  distinct(URL, .keep_all = TRUE) |>
+  select(NAME2, NAME3, MGMT, MGMT_2, SOURCE, STATE_PARK, NAME,  URL) |>
+  mutate(Link = NA,
+         `WORKING_URL` = NA,
+         Parent_Site = str_extract(URL, '(?<=//)(.*?)(?=/)')) |>
+  add_count(Parent_Site) |>
+  arrange(desc(n), Parent_Site, NAME) |>
+  # writexl::write_xlsx("~/Existing Trails/Colby/ManualURLCorrection.xlsx")
+```
+
+```{r}
+trails |>
+  select(URL) |>
+  mutate(parent_site = str_extract(URL, '(?<=//)(.*?)(?=/)')) |>
+  view()
+```
+
