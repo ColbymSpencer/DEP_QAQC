@@ -1,0 +1,37 @@
+---
+title: "Structures"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup libraries and functions}
+# import libraries
+library(tidyverse)
+library(sf)
+library(janitor)
+
+# create custom functions
+skimmer <- function(layer, n = 50) {
+  sapply(layer, function(x) {
+    uniq <- unique(x)
+    if (length(uniq) < n)
+      uniq_values = sort(uniq)
+    else
+      length(uniq)
+  })
+}
+```
+
+
+```{r}
+structures <- sf::st_read('C:/Users/Spencer_C/Desktop/FPS20250211.gdb', layer = 'Structures_Statewide') |>
+  as_tibble() |>
+  janitor::clean_names()
+```
+
+```{r}
+skimmer(structures, 100)
+```
+
