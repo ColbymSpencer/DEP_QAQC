@@ -7,11 +7,13 @@ editor_options:
 ---
 
 Staff at the bureau of natural and cultural resources (BNCR) want to do site visits to natural communities closest to them. Using the location of the office where BNCR is located, the closest natural community of each type will be listed.
+
 ```{r}
 library(tidyverse)
 ```
 
 imoprt natcom layer and near table generated in ArcGIS Pro
+
 ```{r}
 natcoms <- sf::st_read('C:/Users/Spencer_C/Desktop/GDB Copy/FloridaStateParksGIS.gdb', 
                        layer = 'Natural_Communities_Statewide',
@@ -27,6 +29,7 @@ near_table <- sf::st_read('C:/Users/Spencer_C/Documents/ArcGIS/Projects/Closest 
 ```
 
 select only relevant fields and join tables based on object id (oid).
+
 ```{r clean}
 nc <- natcoms |>
   select(site_name, ec_type, ec_code, dfc_type, dfc_code, acreage, oid) |>
@@ -46,8 +49,8 @@ closest_nc <- left_join(nc, nt, by = join_by(oid)) |>
 ```
 
 export table
+
 ```{r}
 closest_nc |>
   writexl::write_xlsx('C:/Users/Spencer_C/Documents/ArcGIS/Projects/Closest NatComs/Closest Natural Communities.xlsx')
 ```
-

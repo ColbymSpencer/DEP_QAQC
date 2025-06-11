@@ -1,0 +1,33 @@
+---
+title: "POI Amenities and Experiences"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+```{r}
+poi <- sf::st_read('C:/Users/Spencer_C/Desktop/FPS20250211.gdb', layer = 'POI_Statewide') |>
+  as_tibble() |>
+  janitor:: clean_names()
+
+ane <- read_excel("C:/Users/Spencer_C/Documents/Web Scrape/feature_table_long.xlsx") |>
+  janitor::clean_names()
+```
+
+```{r}
+poi |>
+  count(poi_classification, sort =  TRUE) |>
+  view()
+```
+
+```{r}
+ane |>
+  count(filter) |>
+  view()
+```
+
